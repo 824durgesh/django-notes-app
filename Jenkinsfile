@@ -3,7 +3,6 @@ pipeline {
     agent { label 'vinod' }
 
     stages {
-
         stage("Code") {
             steps {
                 echo "📥 This is cloning the code"
@@ -15,7 +14,7 @@ pipeline {
             steps {
                 script {
                     echo "🔨 Building Docker image..."
-                    docker_build("notes-app", "latest", "trainwithshubham")
+                    docker_build("notes-app", "latest", "notes-app")  // fixed here
                 }
             }
         }
@@ -24,7 +23,7 @@ pipeline {
             steps {
                 script {
                     echo "📤 Pushing Docker image..."
-                    docker_push("notes-app", "latest", "durgesh040")
+                    docker_push("notes-app", "latest", "durgesh040")  // will succeed now
                 }
             }
         }
@@ -32,7 +31,6 @@ pipeline {
         stage("Test") {
             steps {
                 echo "🧪 This is testing the code"
-                // You can run `pytest`, `docker exec`, or placeholder here
             }
         }
 
