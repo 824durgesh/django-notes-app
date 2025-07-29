@@ -1,39 +1,61 @@
 @Library("Shared") _
 pipeline {
     agent { label 'vinod' }
-    
+
+    environment {
+        PROJECT_NAME   = 'notes-app'
+        IMAGE_TAG      = 'latest'
+        DOCKERHUB_USER = 'durgesh040'
+    }
+
     stages {
-        
-        stage("Code") {
-            steps {
-                echo "This is cloning the code"
-                git url: "https://github.com/LondheShubham153/django-notes-app.git", branch: "main"
-            }
-        }
-        stage("Build") {
+
+        stage("Clone Code") {
             steps {
                 script {
-                    docker_build("notes-app","latest","trainwithshubham")
+                    git_clone("https://github.com/LondheShubham153/django-notes-app.git", "main")
                 }
             }
         }
-        stage("Push to DockerHub") {
+
+        stage("Build Image") {
             steps {
                 script {
-                    docker_push("notes-app","latest","durgesh040")
+                    docker_build(env.PROJECT_NAME, env.IMAGE_TAG, env.DOCKERHUB_USER)
                 }
             }
         }
+
+        stage("Push Image to DockerHub") {
+            steps {
+                script {
+                    docker_push(env.PROJECT_NAME, env.IMAGE_TAG, env.DOCKERHUB_USER)
+                }
+            }
+        }
+
         stage("Test") {
             steps {
-                echo "This is testing the code"
+                echo "✅ Running Tests... (Placeholder)"
+                // Add `pytest` or test commands if needed
             }
         }
-        stage("Deploy") {
+
+        stage("Deploy with Docker Compose") {
             steps {
-                echo "This is deploying the code"
+                echo "🚀 Deploying with Docker Compose..."
                 sh "docker compose up -d"
             }
+        }
+    }
+
+    post {
+        always {
+            echo "🧹 Pipeline completed. Cleaning up unused Docker resources (optional)."
+            // sh "docker system prune -f" // Uncomment if you want automatic cleanup
+        }
+        failure {
+            echo "❌ Build failed!"
         }
     }
 }
