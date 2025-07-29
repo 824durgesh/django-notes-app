@@ -1,6 +1,6 @@
 @Library('Shared')_
 pipeline{
-    agent { label 'dev-server'}
+    agent { label 'vinod'}
     
     stages{
         stage("Code clone"){
