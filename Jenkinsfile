@@ -2,60 +2,54 @@
 pipeline {
     agent { label 'vinod' }
 
-    environment {
-        PROJECT_NAME   = 'notes-app'
-        IMAGE_TAG      = 'latest'
-        DOCKERHUB_USER = 'durgesh040'
-    }
-
     stages {
 
-        stage("Clone Code") {
+        stage("Code") {
+            steps {
+                echo "📥 This is cloning the code"
+                git url: "https://github.com/LondheShubham153/django-notes-app.git", branch: "main"
+            }
+        }
+
+        stage("Build") {
             steps {
                 script {
-                    git_clone("https://github.com/LondheShubham153/django-notes-app.git", "main")
+                    echo "🔨 Building Docker image..."
+                    docker_build("notes-app", "latest", "trainwithshubham")
                 }
             }
         }
 
-        stage("Build Image") {
+        stage("Push to DockerHub") {
             steps {
                 script {
-                    docker_build(env.PROJECT_NAME, env.IMAGE_TAG, env.DOCKERHUB_USER)
-                }
-            }
-        }
-
-        stage("Push Image to DockerHub") {
-            steps {
-                script {
-                    docker_push(env.PROJECT_NAME, env.IMAGE_TAG, env.DOCKERHUB_USER)
+                    echo "📤 Pushing Docker image..."
+                    docker_push("notes-app", "latest", "durgesh040")
                 }
             }
         }
 
         stage("Test") {
             steps {
-                echo "✅ Running Tests... (Placeholder)"
-                // Add `pytest` or test commands if needed
+                echo "🧪 This is testing the code"
+                // You can run `pytest`, `docker exec`, or placeholder here
             }
         }
 
-        stage("Deploy with Docker Compose") {
+        stage("Deploy") {
             steps {
-                echo "🚀 Deploying with Docker Compose..."
+                echo "🚀 This is deploying the code using Docker Compose"
                 sh "docker compose up -d"
             }
         }
     }
 
     post {
-        always {
-            echo "🧹 Pipeline completed. Cleaning up unused Docker resources (optional)."
-            // sh "docker system prune -f" // Uncomment if you want automatic cleanup
+        success {
+            echo "✅ Pipeline executed successfully!"
         }
         failure {
-            echo "❌ Build failed!"
+            echo "❌ Pipeline failed. Please check the logs."
         }
     }
 }
